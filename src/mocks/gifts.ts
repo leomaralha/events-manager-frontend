@@ -13,6 +13,16 @@ const mockGiftsByEvent: Record<number, Gift[]> = {
   ],
 };
 
+// See the comment on `resolvedThenable` in `mocks/events.ts`: this data is
+// always available synchronously, so the promise is tagged as already
+// fulfilled to avoid an unnecessary Suspense throw/retry in `use()`.
+function resolvedThenable<T>(value: T): Promise<T> {
+  const promise = Promise.resolve(value) as Promise<T> & { status?: string; value?: T };
+  promise.status = "fulfilled";
+  promise.value = value;
+  return promise;
+}
+
 export function fetchMockGifts(eventId: number): Promise<Gift[]> {
-  return Promise.resolve(mockGiftsByEvent[eventId] ?? []);
+  return resolvedThenable(mockGiftsByEvent[eventId] ?? []);
 }
