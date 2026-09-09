@@ -1,3 +1,11 @@
+import { RouterProvider } from "react-router-dom";
+import { MockAuthProvider } from "./context/AuthContext";
+import { router } from "./router";
+
 export default function App() {
-  return <p>Event Manager scaffold ready.</p>;
+  return (
+    <MockAuthProvider>
+      <RouterProvider router={router} />
+    </MockAuthProvider>
+  );
 }
