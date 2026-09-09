@@ -39,4 +39,18 @@ describe("EventDetailPage", () => {
 
     expect(await screen.findByText(/you're confirmed/i)).toBeInTheDocument();
   });
+
+  it("lets a guest claim an unclaimed gift", async () => {
+    await renderAt("/events/summer-bbq");
+    await screen.findByText("Cooler Box");
+
+    await userEvent.click(screen.getByRole("button", { name: /claim this gift/i }));
+    const nameFields = screen.getAllByLabelText("Your name");
+    const emailFields = screen.getAllByLabelText("Your email");
+    await userEvent.type(nameFields[nameFields.length - 1], "Bruno Lima");
+    await userEvent.type(emailFields[emailFields.length - 1], "bruno@example.com");
+    await userEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(await screen.findByText(/thanks for claiming/i)).toBeInTheDocument();
+  });
 });

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { EventDetail } from "../components/events/EventDetail";
 import { GiftList } from "../components/gifts/GiftList";
+import { GiftClaimForm } from "../components/gifts/GiftClaimForm";
 import { RsvpForm } from "../components/guests/RsvpForm";
 import { fetchMockEventDetails, mockEvents } from "../mocks/events";
 import { fetchMockGifts } from "../mocks/gifts";
@@ -17,6 +18,10 @@ export function EventDetailPage() {
     return { ok: true };
   }
 
+  async function handleClaim(): Promise<SubmitResult> {
+    return { ok: true };
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <EventDetail eventPromise={eventPromise} />
@@ -26,7 +31,12 @@ export function EventDetailPage() {
       </div>
       <div>
         <h2 className="mb-2 text-lg font-semibold text-slate-900">Gifts</h2>
-        <GiftList giftsPromise={giftsPromise} />
+        <GiftList
+          giftsPromise={giftsPromise}
+          renderAction={(gift) =>
+            gift.claimed ? null : <GiftClaimForm gift={gift} onClaim={handleClaim} />
+          }
+        />
       </div>
     </div>
   );
