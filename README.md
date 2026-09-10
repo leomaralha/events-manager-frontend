@@ -19,12 +19,36 @@ defined in `src/types/contracts.ts` and demoed against fixtures in
 `src/mocks/`. Wiring real data and auth on top of these components is a
 separate piece of work.
 
-## Development
+## Setup
+
+### Prerequisites
+
+- Node.js 20+ and npm
+
+### Install
 
 ```bash
+git clone git@github.com:leomaralha/events-manager-frontend.git
+cd events-manager-frontend
 npm install
-npm run dev      # start the dev server
+```
+
+### Run
+
+```bash
+npm run dev      # start the dev server (default: http://localhost:5173)
+```
+
+### Test
+
+```bash
 npm test         # run the test suite once
 npm run test:watch
-npm run build
+```
+
+### Build
+
+```bash
+npm run build    # type-checks and produces a production build in dist/
+npm run preview  # preview the production build locally
 ```
