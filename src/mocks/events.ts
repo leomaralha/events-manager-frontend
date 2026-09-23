@@ -1,29 +1,71 @@
+import { apiFetch } from "../services/api";
 import type { EventSummary, EventDetails } from "../types/domain";
 
 export const mockEvents: EventSummary[] = [
-  { id: 1, slug: "ana-e-joao", name: "Ana & João's Wedding", date: "2026-11-14" },
+  {
+    id: 1,
+    slug: "ana-e-joao",
+    name: "Ana & João's Wedding",
+    date: "2026-11-14",
+  },
   { id: 2, slug: "summer-bbq", name: "Summer BBQ Party", date: "2026-07-20" },
-  { id: 3, slug: "baby-shower-lu", name: "Lu's Baby Shower", date: "2026-08-02" },
+  {
+    id: 3,
+    slug: "baby-shower-lu",
+    name: "Lu's Baby Shower",
+    date: "2026-08-02",
+  },
 ];
 
-// This mock data is always available synchronously, so the returned promise
-// is tagged with the `status`/`value` fields React's `use()` hook checks
-// before suspending (see react-dom's `trackUsedThenable`). That lets `use()`
-// read the value on its very first call instead of throwing and waiting for
-// a Suspense retry, which real screens never need for already-known data.
-function resolvedThenable<T>(value: T): Promise<T> {
-  const promise = Promise.resolve(value) as Promise<T> & { status?: string; value?: T };
-  promise.status = "fulfilled";
-  promise.value = value;
-  return promise;
+export async function fetchMockEvents(): Promise<EventSummary[]> {
+  const events = await apiFetch<{
+    weddings: {
+      coupleName: string;
+      createdAt: string;
+      id: number;
+      ownerId: number;
+      slug: string;
+      weddingDate: string;
+    }[];
+  }>("/wedding?shouldReturnAll=true");
+  return events.weddings.map((wedding) => {
+    return {
+      date: wedding.weddingDate,
+      id: wedding.id,
+      name: wedding.coupleName,
+      slug: wedding.slug,
+    } as EventSummary;
+  });
 }
 
-export function fetchMockEvents(): Promise<EventSummary[]> {
-  return resolvedThenable(mockEvents);
-}
-
-export function fetchMockEventDetails(slug: string): Promise<EventDetails> {
-  const event = mockEvents.find((e) => e.slug === slug);
-  if (!event) return Promise.reject(new Error(`Event not found: ${slug}`));
-  return resolvedThenable({ ...event, giftCount: 4, guestCount: 12 });
+export async function fetchMockEventDetails(slug: string): Promise<EventDetails> {
+  const weddingDetails = await apiFetch<{
+    wedding: {
+      coupleName: string;
+      createdAt: string;
+      id: number;
+      ownerId: number;
+      slug: string;
+      weddingDate: string;
+    };
+    guests: { id: number; name: string; email: string; createdAt: string }[];
+    gifts: {
+      id: number;
+      name: string;
+      description: string;
+      price: string;
+      weddingId: number;
+    }[];
+    giftCount: number;
+    guestCount: number;
+  }>(`/weddings/${slug}`);
+  const eventDetails = {
+    date: weddingDetails.wedding.weddingDate,
+    giftCount: weddingDetails.giftCount,
+    guestCount: weddingDetails.guestCount,
+    id: weddingDetails.wedding.id,
+    name: weddingDetails.wedding.coupleName,
+    slug: weddingDetails.wedding.slug,
+  }
+  return eventDetails
 }

@@ -4,19 +4,47 @@ import { EventDetail } from "../components/events/EventDetail";
 import { GiftList } from "../components/gifts/GiftList";
 import { GiftClaimForm } from "../components/gifts/GiftClaimForm";
 import { RsvpForm } from "../components/guests/RsvpForm";
-import { fetchMockEventDetails, mockEvents } from "../mocks/events";
+import { fetchMockEventDetails } from "../mocks/events";
 import { fetchMockGifts } from "../mocks/gifts";
 import type { SubmitResult } from "../types/domain";
+import { apiFetch } from "../services/api";
 
 export function EventDetailPage() {
   const { slug = "" } = useParams();
   const eventPromise = useMemo(() => fetchMockEventDetails(slug), [slug]);
-  const eventId = mockEvents.find((e) => e.slug === slug)?.id ?? 0;
-  const giftsPromise = useMemo(() => fetchMockGifts(eventId), [eventId]);
+  const giftsPromise = useMemo(
+    () => eventPromise.then((event) => fetchMockGifts(event.id)),
+    [eventPromise],
+  );
 
-  async function handleRsvp(): Promise<SubmitResult> {
+async function handleRsvp({
+  guestName,
+  guestEmail,
+}: {
+  guestName: string;
+  guestEmail: string;
+}): Promise<SubmitResult> {
+  try {
+    const event = await eventPromise;
+
+    await apiFetch(`/wedding/${event.id}/guest`, {
+      method: "POST",
+      body: JSON.stringify({
+        name: guestName,
+        email: guestEmail,
+      }),
+    });
+
     return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error
+        ? error.message
+        : "It was not possible to confirm attendance.",
+    };
   }
+}
 
   async function handleClaim(): Promise<SubmitResult> {
     return { ok: true };

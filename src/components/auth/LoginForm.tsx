@@ -19,8 +19,20 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      <TextField label="Email" name="email" type="email" required />
-      <TextField label="Password" name="password" type="password" required />
+      <TextField
+        label="Email"
+        name="email"
+        type="email"
+        autoComplete="username"
+        required
+      />
+      <TextField
+        label="Password"
+        name="password"
+        type="password"
+        autoComplete="current-password"
+        required
+      />
       {state.status === "error" ? <ErrorBanner message={state.message ?? "Login failed"} /> : null}
       <Button type="submit" isLoading={isPending}>
         Log in
