@@ -88,5 +88,8 @@ export interface RegisterFormProps {
 
 export interface AuthContextValue {
   currentUser: AuthUser | null;
-  onLogout: () => void;
+  /** Exchanges credentials for a bearer token and loads the signed-in user. */
+  signIn: (email: string, password: string) => Promise<LoginOutcome>;
+  /** Discards the bearer token; there is no server-side logout to call. */
+  signOut: () => void;
 }

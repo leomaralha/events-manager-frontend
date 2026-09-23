@@ -1,9 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../ui/Button";
 
 export function NavBar() {
-  const { currentUser, onLogout } = useAuth();
+  const { currentUser, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    signOut();
+    navigate("/");
+  }
 
   return (
     <nav className="flex items-center justify-between border-b border-slate-200 px-6 py-3">
@@ -16,7 +22,7 @@ export function NavBar() {
             <Link to="/dashboard" className="text-sm text-slate-700 hover:underline">
               Dashboard
             </Link>
-            <Button variant="secondary" onClick={onLogout}>
+            <Button variant="secondary" onClick={handleLogout}>
               Log out
             </Button>
           </>

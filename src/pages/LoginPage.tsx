@@ -1,51 +1,25 @@
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { LoginForm } from "../components/auth/LoginForm";
-import { apiFetch } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import type { LoginOutcome } from "../types/domain";
 
 export function LoginPage() {
+  const { currentUser, signIn } = useAuth();
   const navigate = useNavigate();
+
+  if (currentUser) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   async function handleLogin(
     email: string,
     password: string,
   ): Promise<LoginOutcome> {
-    try {
-      const normalizedEmail = email.trim().toLowerCase();
-      const normalizedPassword = password.trim();
-
-      if (!normalizedEmail || !normalizedPassword) {
-        return {
-          ok: false,
-          error: "Informe o email e a senha.",
-        };
-      }
-
-      const result = await apiFetch<{
-        token: string;
-        expiresAt: string;
-      }>("/user/login", {
-        method: "POST",
-        body: JSON.stringify({
-          email: normalizedEmail,
-          password: normalizedPassword,
-        }),
-      });
-
-      localStorage.setItem("sessionToken", result.token);
-      navigate("/dashboard");
-
-      return {
-        ok: true,
-        token: result.token,
-        expiresAt: result.expiresAt,
-      };
-    } catch (error) {
-      return {
-        ok: false,
-        error: error instanceof Error ? error.message : "Login failed",
-      };
+    const outcome = await signIn(email, password);
+    if (outcome.ok) {
+      navigate("/dashboard", { replace: true });
     }
+    return outcome;
   }
 
   return (

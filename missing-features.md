@@ -47,3 +47,18 @@ None of these were fixed here — the backend repo is out of scope to modify.
 11. **No `/logout` endpoint** — acceptable, since auth is now a bearer
     token (`POST /user/login` returns `{ token, expiresAt }` in the
     response body, no cookie); discarding it client-side is sufficient.
+
+12. **No `GET /me` endpoint.** The bearer token is opaque, and
+    `POST /user/login` returns only `{ token, expiresAt }` — nothing
+    identifying the user. The auth context therefore calls `GET /me` with
+    the bearer token to learn who is signed in, and treats a 401/403 there
+    as "this token is dead" (it clears the stored session). Until that
+    endpoint exists, sign-in fails after the token is issued. It should
+    return the user as `{ id, name, email }` (the `{ user: … }` envelope
+    `POST /users` uses is also accepted).
+
+13. **`POST /user/login` does not exist as documented.** The route
+    registered in `events-manager` is `POST /login`, and it replies with
+    `{ message, user }` plus an httpOnly `sessionId` cookie — not the
+    `{ token, expiresAt }` bearer body this frontend is built against
+    (see item 11). One of the two has to move.
